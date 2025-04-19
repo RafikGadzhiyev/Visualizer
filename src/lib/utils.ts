@@ -32,3 +32,16 @@ export function getMinNumber(nums: number[]) {
 
   return max;
 }
+
+export function sleep(ms: number) {
+  return new Promise(
+    (resolve) => {
+      setTimeout(
+        () => {
+          resolve('Woke up!')
+        },
+        ms
+      )
+    }
+  )
+}
