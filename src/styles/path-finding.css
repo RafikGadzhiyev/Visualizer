@@ -1,0 +1,32 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+
+.path--cell {
+  @apply bg-white border-black
+}
+
+
+.path--current-visit {
+  @apply bg-blue-300 animate-pulse
+}
+
+.path--visited-cell {
+  @apply bg-blue-600
+}
+
+.path--found-path-cell {
+  @apply bg-yellow-400
+}
+
+.path--wall {
+  @apply bg-gray-800
+}
+
+.path--start-position {
+  @apply bg-green-500
+}
+
+.path--finish-position {
+  @apply bg-red-500
+}
