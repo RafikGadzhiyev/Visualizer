@@ -279,7 +279,6 @@ function PathFinding() {
 
             <SelectContent>
               <SelectItem value="bfs">BFS</SelectItem>
-              <SelectItem value="dfs" disabled>DFS</SelectItem>
               <SelectItem value="dijkstra" disabled>dijkstra</SelectItem>
               <SelectItem value="a_star" disabled>A*</SelectItem>
             </SelectContent>
