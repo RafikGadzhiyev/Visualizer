@@ -21,12 +21,17 @@ import {
 } from "@/components/ui/card"
 
 import { Button } from "@/components/ui/button"
+import { Slider } from "@/components/ui/slider"
 
 import { sleep } from "@/lib/utils"
 
 import {
   GRID_COLS,
-  GRID_ROWS
+  GRID_ROWS,
+
+  DEFAULT_ILLUSTRATION_SPEED,
+  MAX_ILLUSTRATION_SPEED,
+  MIN_ILLUSTRATION_SPEED
 } from "@/lib/constants"
 
 import {
@@ -43,6 +48,7 @@ import './../styles/path-finding.css'
 
 function PathFinding() {
   const [selectedAlgorithm, setSelectedAlgorithm] = useState('bfs')
+  const [illustrationSpeed, setIllustrationSpeed] = useState(DEFAULT_ILLUSTRATION_SPEED)
 
   const [grid, setGrid] = useState<Array<GridItem[]>>([])
 
@@ -235,7 +241,7 @@ function PathFinding() {
       setGrid(() => [...grid])
       setVisitingCells(() => [...queue.map(node => node.cell.key)])
 
-      await sleep(100)
+      await sleep(illustrationSpeed)
     }
 
     setVisitingCells([])
@@ -253,7 +259,7 @@ function PathFinding() {
 
       currentCell = grid[currentCell.parent.row][currentCell.parent.col]
       setGrid([...grid])
-      await sleep(100)
+      await sleep(illustrationSpeed)
     }
   }
 
@@ -267,6 +273,10 @@ function PathFinding() {
 
   function getKeyFromCellPosition(cellPosition: Position) {
     return cellPosition.row + '__' + cellPosition.col
+  }
+
+  function onIllustrationSpeedChange(newIllustrationSpeed: number) {
+    setIllustrationSpeed(newIllustrationSpeed)
   }
 
   useEffect(
@@ -296,6 +306,21 @@ function PathFinding() {
             </SelectContent>
           </Select>
 
+          <div className='flex flex-col gap-1'>
+            <label className='text-sm'>
+              Illustration speed
+            </label>
+
+            <Slider
+              onValueChange={(e) => onIllustrationSpeedChange(e[0])}
+              defaultValue={[DEFAULT_ILLUSTRATION_SPEED]}
+              min={MIN_ILLUSTRATION_SPEED}
+              max={MAX_ILLUSTRATION_SPEED}
+              step={1}
+              className='flex-1'
+            />
+          </div>
+
           <Button
             onClick={() => bfs()}
             variant='positive'
@@ -303,6 +328,7 @@ function PathFinding() {
             Run
           </Button>
         </CardHeader>
+
         <CardContent className="h-full overflow-x-auto">
           <div
             ref={gridRef}
