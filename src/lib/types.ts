@@ -1,14 +1,11 @@
+import { CELL_STATE } from '../enums/cellState.enum'
+
 export type GridItem = {
   key: string,
   row: number,
   col: number,
-  blocked: boolean,
-  visited: boolean,
-  pathPart: boolean,
-  parent?: {
-    row: number,
-    col: number
-  },
+  state: CELL_STATE,
+  parent: Position | null,
 }
 
 export type Position = {
@@ -19,4 +16,9 @@ export type Position = {
 export type Node = {
   key: string,
   parent?: string,
+}
+
+export type PathNode = {
+  cell: GridItem,
+  parent: Position | null,
 }
