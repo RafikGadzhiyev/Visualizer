@@ -3,6 +3,7 @@ import {
   useRef,
   useState
 } from "react"
+import clsx from "clsx"
 
 import {
   Select,
@@ -19,19 +20,26 @@ import {
   CardHeader,
 } from "@/components/ui/card"
 
+import { Button } from "@/components/ui/button"
+
+import { sleep } from "@/lib/utils"
 
 import {
   GRID_COLS,
   GRID_ROWS
 } from "@/lib/constants"
-import { GridItem, PathNode, Position } from "@/lib/types"
-import clsx from "clsx"
 
-import './../styles/path-finding.css'
-import { sleep } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
+import {
+  GridItem,
+  PathNode,
+  Position
+} from "@/lib/types"
 
 import { CELL_STATE } from '../enums/cellState.enum'
+
+
+import './../styles/path-finding.css'
+
 
 function PathFinding() {
   const [selectedAlgorithm, setSelectedAlgorithm] = useState('bfs')
