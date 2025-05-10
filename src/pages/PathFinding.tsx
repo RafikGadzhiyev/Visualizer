@@ -60,9 +60,14 @@ function PathFinding() {
       const row = []
 
       for (let j = 0; j < GRID_COLS; ++j) {
+        const cellPosition = {
+          row: i,
+          col: j,
+        }
+
         row.push(
           {
-            key: i + '__' + j,
+            key: getKeyFromCellPosition(cellPosition),
             row: i,
             col: j,
             state: CELL_STATE.EMPTY,
@@ -109,9 +114,7 @@ function PathFinding() {
     const [
       row,
       col
-    ] = cellKey
-      .split('__')
-      .map(key => +key)
+    ] = getCellPositionFromKey(cellKey)
 
       if (grid[row][col].state === CELL_STATE.BLOCKED) {
         return;
@@ -252,7 +255,18 @@ function PathFinding() {
       setGrid([...grid])
       await sleep(100)
     }
+  }
 
+  function getCellPositionFromKey(key: string) {
+    return key
+    .split('__')
+    .map(
+      stringifiedKeyPart => +stringifiedKeyPart
+    )
+  }
+
+  function getKeyFromCellPosition(cellPosition: Position) {
+    return cellPosition.row + '__' + cellPosition.col
   }
 
   useEffect(
