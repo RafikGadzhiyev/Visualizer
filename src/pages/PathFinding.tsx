@@ -24,12 +24,14 @@ import {
   GRID_COLS,
   GRID_ROWS
 } from "@/lib/constants"
-import { GridItem, Position } from "@/lib/types"
+import { GridItem, PathNode, Position } from "@/lib/types"
 import clsx from "clsx"
 
 import './../styles/path-finding.css'
 import { sleep } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
+
+import { CELL_STATE } from '../enums/cellState.enum'
 
 function PathFinding() {
   const [selectedAlgorithm, setSelectedAlgorithm] = useState('bfs')
@@ -37,14 +39,14 @@ function PathFinding() {
   const [grid, setGrid] = useState<Array<GridItem[]>>([])
 
   const [startPosition, setStartPosition] = useState<Position>({ row: 1, col: 1 })
-  const [finishPosition, setFinishPosition] = useState<Position>({ row: 10, col: 2})
+  const [finishPosition, setFinishPosition] = useState<Position>({ row: 10, col: 10})
 
   const [visitingCells, setVisitingCells] = useState<string[]>([])
 
   const gridRef = useRef<HTMLDivElement | null>(null)
 
   function initGrid() {
-    const preparedGrid = [];
+    const preparedGrid: Array<GridItem[]> = [];
 
     for (let i = 0; i < GRID_ROWS; ++i) {
       const row = []
@@ -55,9 +57,8 @@ function PathFinding() {
             key: i + '__' + j,
             row: i,
             col: j,
-            blocked: false,
-            visited: false,
-            pathPart: false,
+            state: CELL_STATE.EMPTY,
+            parent: null,
           }
         )
       }
@@ -106,16 +107,15 @@ function PathFinding() {
       .split('__')
       .map(key => +key)
 
-      if (grid[row][col].blocked) {
+      if (grid[row][col].state === CELL_STATE.BLOCKED) {
         return;
       }
 
       setGrid(
         prevGrid => {
-          prevGrid[row][col].blocked = true
+          prevGrid[row][col].state = CELL_STATE.BLOCKED;
 
-          // TODO: clone util
-          return JSON.parse(JSON.stringify(prevGrid))
+          return [...prevGrid]
         }
       )
   }
@@ -141,8 +141,11 @@ function PathFinding() {
       prevGrid => {
         for (const row of prevGrid) {
           for (const cell of row) {
-            cell.visited = false;
-            cell.pathPart = false
+            if (cell.state === CELL_STATE.BLOCKED) {
+              continue
+            }
+
+            cell.state = CELL_STATE.EMPTY
           }
         }
 
@@ -152,7 +155,7 @@ function PathFinding() {
 
     const startGridItem = grid[startPosition.row][startPosition.col]
 
-    const queue: {cell: any, parent: any}[]= [
+    const queue: PathNode[]= [
       {
         cell: startGridItem,
         parent: null,
@@ -180,13 +183,13 @@ function PathFinding() {
         const cell = node.cell
 
         if (
-          cell.blocked
-          || cell.visited
+          cell.state === 'blocked'
+          || cell.state === 'visited'
         ) {
           continue
         }
 
-        grid[cell.row][cell.col].visited = true
+        grid[cell.row][cell.col].state = CELL_STATE.VISITED
         grid[cell.row][cell.col].parent = node.parent
 
         if (cell.row === finishPosition.row && cell.col === finishPosition.col) {
@@ -237,7 +240,7 @@ function PathFinding() {
         break;
       }
 
-      currentCell.pathPart = true
+      currentCell.state = CELL_STATE.PATH_PART
 
       currentCell = grid[currentCell.parent.row][currentCell.parent.col]
       setGrid([...grid])
@@ -304,20 +307,17 @@ function PathFinding() {
                               clsx(
                                 {
                                   'transition ease-in-out select-none border h-full min-h-2 flex-1': true,
-                                  'path--cell': !gridItem.blocked && !gridItem.visited,
-                                  'path--wall': gridItem.blocked,
+                                  'path--cell': gridItem.state !== CELL_STATE.BLOCKED && gridItem.state !== CELL_STATE.VISITED,
+                                  'path--wall': gridItem.state === CELL_STATE.BLOCKED,
                                   'path--start-position': startPosition.row === gridItem.row && startPosition.col === gridItem.col,
                                   'path--finish-position': finishPosition.row === gridItem.row && finishPosition.col === gridItem.col,
-                                  'path--visited-cell': gridItem.visited,
+                                  'path--visited-cell': gridItem.state === CELL_STATE.VISITED,
                                   'path--current-visit': visitingCells.includes(gridItem.key),
-                                  'path--found-path-cell': gridItem.pathPart,
-                                  'animate-ping-short': gridItem.pathPart
+                                  'path--found-path-cell animate-ping-short': gridItem.state === CELL_STATE.PATH_PART,
                                 }
                               )
                             }
-                          >
-
-                          </div>
+                          />
                         )
                       )
                     }
