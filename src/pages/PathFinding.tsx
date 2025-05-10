@@ -57,6 +57,8 @@ function PathFinding() {
 
   const [visitingCells, setVisitingCells] = useState<string[]>([])
 
+  const [isVisualizing, setIsVisualizing] = useState(false)
+
   const gridRef = useRef<HTMLDivElement | null>(null)
 
   function initGrid() {
@@ -126,6 +128,14 @@ function PathFinding() {
         return;
       }
 
+      if (row === startPosition.row && col === startPosition.col) {
+        return;
+      }
+
+      if (row === finishPosition.row && col === finishPosition.col) {
+        return;
+      }
+
       setGrid(
         prevGrid => {
           prevGrid[row][col].state = CELL_STATE.BLOCKED;
@@ -149,6 +159,15 @@ function PathFinding() {
       'mouseup',
       onGridMouseUp
     )
+  }
+
+  function runAlgorithm() {
+    setIsVisualizing(true)
+
+    switch(selectedAlgorithm) {
+      case "bfs":
+        return bfs()
+    }
   }
 
   async function bfs() {
@@ -261,6 +280,8 @@ function PathFinding() {
       setGrid([...grid])
       await sleep(illustrationSpeed)
     }
+
+    setIsVisualizing(false)
   }
 
   function getCellPositionFromKey(key: string) {
@@ -322,7 +343,8 @@ function PathFinding() {
           </div>
 
           <Button
-            onClick={() => bfs()}
+            onClick={runAlgorithm}
+            disabled={isVisualizing}
             variant='positive'
           >
             Run
