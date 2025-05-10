@@ -1,7 +1,7 @@
 import {
   useEffect,
   useRef,
-  useState
+  useState,
 } from "react"
 import clsx from "clsx"
 
@@ -60,6 +60,8 @@ function PathFinding() {
   const [isVisualizing, setIsVisualizing] = useState(false)
 
   const gridRef = useRef<HTMLDivElement | null>(null)
+  //? Is it Good?
+  const onMouseMoveHandlerRef = useRef<(e: MouseEvent) => void>(null)
 
   function initGrid() {
     const preparedGrid: Array<GridItem[]> = [];
@@ -90,14 +92,38 @@ function PathFinding() {
     setGrid(preparedGrid)
   }
 
-  function onGridMouseDown() {
+  function onGridMouseDown(e: MouseEvent) {
     if (!gridRef.current) {
       return
     }
 
+    const gridCell = e.target as HTMLDivElement
+
+    if (!gridCell.hasAttribute('data-itemKey')) {
+      return
+    }
+
+    const cellKey = gridCell.getAttribute('data-itemKey') as string
+
+    const [
+      row,
+      col
+    ] = getCellPositionFromKey(cellKey)
+
+    let functionType = 'block-cell'
+
+    if (row === startPosition.row && col === startPosition.col) {
+      functionType = 'change-start-position'
+    }
+    else if (row === finishPosition.row && col === finishPosition.col) {
+      functionType = 'change-finish-position'
+    }
+
+    onMouseMoveHandlerRef.current = (e: MouseEvent) => onGridMouseMove(e, functionType)
+
     gridRef.current.addEventListener(
       'mousemove',
-      onGridMouseMove
+      onMouseMoveHandlerRef.current,
     )
 
     gridRef.current.addEventListener(
@@ -106,7 +132,7 @@ function PathFinding() {
     )
   }
 
-  function onGridMouseMove(e: MouseEvent) {
+  function onGridMouseMove(e: MouseEvent, functionType: string) {
     if (!gridRef.current) {
       return;
     }
@@ -124,6 +150,7 @@ function PathFinding() {
       col
     ] = getCellPositionFromKey(cellKey)
 
+    if (functionType === 'block-cell') {
       if (grid[row][col].state === CELL_STATE.BLOCKED) {
         return;
       }
@@ -143,6 +170,23 @@ function PathFinding() {
           return [...prevGrid]
         }
       )
+    }
+    else if (functionType === 'change-start-position') {
+      setStartPosition(
+        {
+          row,
+          col
+        }
+      )
+    }
+    else if (functionType === 'change-finish-position') {
+      setFinishPosition(
+        {
+          row,
+          col,
+        }
+      )
+    }
   }
 
   function onGridMouseUp() {
@@ -150,10 +194,12 @@ function PathFinding() {
       return
     }
 
-    gridRef.current.removeEventListener(
-      'mousemove',
-      onGridMouseMove,
-    )
+    if (onMouseMoveHandlerRef.current) {
+      gridRef.current.removeEventListener(
+        'mousemove',
+        onMouseMoveHandlerRef.current,
+      )
+    }
 
     gridRef.current.removeEventListener(
       'mouseup',
@@ -352,9 +398,10 @@ function PathFinding() {
         </CardHeader>
 
         <CardContent className="h-full overflow-x-auto">
+          {/** FIXME: Event does not want to be any */}
           <div
             ref={gridRef}
-            onMouseDown={onGridMouseDown}
+            onMouseDown={(e: any) => onGridMouseDown(e)}
             className="h-full flex flex-col justify-start"
           >
             {
