@@ -82,8 +82,6 @@ function PathFinding() {
       return
     }
 
-    console.log('down')
-
     gridRef.current.addEventListener(
       'mousemove',
       onGridMouseMove
