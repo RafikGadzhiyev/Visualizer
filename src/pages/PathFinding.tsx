@@ -266,7 +266,6 @@ function PathFinding() {
             () => {
               const cellNode = document.querySelector(`[data-itemKey="${traversedCell.key}"]`)
 
-              //? Do we actually need to delete prev class
               cellNode?.classList.remove('path--current-visit')
               cellNode?.classList.add('path--visited-cell')
             },
