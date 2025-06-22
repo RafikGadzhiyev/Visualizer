@@ -23,3 +23,8 @@ export type PathNode = {
   cell: GridItem,
   parent: Position | null,
 }
+
+export type PathFindingAlgorithmResult = {
+  traversedPath: GridItem[],
+  shortestPath: GridItem[],
+}
