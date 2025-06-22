@@ -1,14 +1,10 @@
 import {
   GridItem,
+  PathFindingAlgorithmResult,
   Position,
  } from "@/lib/types";
 
-type FunctionResult = {
-  traversedPath: Array<GridItem>,
-  shortestPath: Array<GridItem>
-}
-
-function bfs(grid: Array<GridItem[]>, startPosition: Position, endPosition: Position): FunctionResult {
+function bfs(grid: Array<GridItem[]>, startPosition: Position, endPosition: Position): PathFindingAlgorithmResult {
   const traversedPath: Array<GridItem> = []
   const shortestPath: Array<GridItem> = [];
 
