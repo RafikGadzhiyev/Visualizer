@@ -55,6 +55,7 @@ function PathFinding() {
   const [finishPosition, setFinishPosition] = useState<Position>({ row: 10, col: 10})
 
   const [isVisualizing, setIsVisualizing] = useState(false)
+  const [isRanAtLeastOne, setIsRanAtLeastOne] = useState(false)
 
   const gridRef = useRef<HTMLDivElement | null>(null)
   //? Is it Good?
@@ -153,19 +154,14 @@ function PathFinding() {
       col
     ] = getCellPositionFromKey(cellKey)
 
-    if (functionType === 'block-cell') {
-      if (grid[row][col].state === CELL_STATE.BLOCKED) {
-        return;
-      }
-
-      if (row === startPosition.row && col === startPosition.col) {
-        return;
-      }
-
-      if (row === finishPosition.row && col === finishPosition.col) {
-        return;
-      }
-
+    if (
+      functionType === 'block-cell'
+      && (
+        (row !== startPosition.row && col !== startPosition.col)
+        || (row !== finishPosition.row && col !== finishPosition.col)
+        || grid[row][col].state !== CELL_STATE.BLOCKED
+      )
+    ) {
       setGrid(
         prevGrid => {
           prevGrid[row][col].state = CELL_STATE.BLOCKED;
@@ -225,8 +221,9 @@ function PathFinding() {
     }
   }
 
-  function runAlgorithm() {
+  function runAlgorithm(runSpeed: number) {
     setIsVisualizing(true)
+    setIsRanAtLeastOne(true)
     resetGrid()
 
     let algorithmResult: PathFindingAlgorithmResult | null = null;
@@ -245,13 +242,13 @@ function PathFinding() {
       const shortestPathLength = algorithmResult.shortestPath[0]?.pathLength
         || 0
 
-      visualizePath(algorithmResult, illustrationSpeed)
+      visualizePath(algorithmResult, runSpeed)
 
       setTimeout(
         () => {
           setIsVisualizing(false)
         },
-        illustrationSpeed * shortestPathLength + illustrationSpeed * algorithmResult.shortestPath.length
+        runSpeed * shortestPathLength + runSpeed * algorithmResult.shortestPath.length
       )
     }
   }
@@ -262,47 +259,62 @@ function PathFinding() {
 
     for (let i = 0; i < algorithmResult.traversedPath.length; i++) {
       const traversedCell = algorithmResult.traversedPath[i]
+      const cellNode = document.querySelector(`[data-itemKey="${traversedCell.key}"]`)
 
-      setTimeout(
-        () => {
-          const cellNode = document.querySelector(`[data-itemKey="${traversedCell.key}"]`)
+      if (!visualizationSpeed) {
+        cellNode?.classList.add('path--current-visit')
+      }
+      else {
+        setTimeout(
+          () => {
+            cellNode?.classList.add('path--current-visit')
 
-          cellNode?.classList.add('path--current-visit')
-
-        },
-        visualizationSpeed * (traversedCell.pathLength as number),
-      )
+          },
+          visualizationSpeed * (traversedCell.pathLength as number),
+        )
+      }
 
       if (
         traversedCell.pathLength !== shortestPathLength
         || (traversedCell.row === finishPosition.row && traversedCell.col === finishPosition.col)
       ) {
-        setTimeout(
-          () => {
-            const cellNode = document.querySelector(`[data-itemKey="${traversedCell.key}"]`)
+        if (!visualizationSpeed) {
+          cellNode?.classList.remove('path--current-visit')
+          cellNode?.classList.add('path--visited-cell')
+        }
+        else {
+          setTimeout(
+            () => {
+              cellNode?.classList.remove('path--current-visit')
+              cellNode?.classList.add('path--visited-cell')
 
-            cellNode?.classList.remove('path--current-visit')
-            cellNode?.classList.add('path--visited-cell')
-          },
-          visualizationSpeed * (traversedCell.pathLength as number + 1),
-        )
+            },
+            visualizationSpeed * (traversedCell.pathLength as number + 1),
+          )
+        }
       }
     }
 
     for (let i = 0; i < algorithmResult.shortestPath.length; i++){
       const traversedCell = algorithmResult.shortestPath[i]
+      const cellNode = document.querySelector(`[data-itemKey="${traversedCell.key}"]`)
 
-      setTimeout(
-        () => {
-          const cellNode = document.querySelector(`[data-itemKey="${traversedCell.key}"]`)
-
-          cellNode?.classList.add(
-            'path--found-path-cell',
-            'animate-ping-short'
-          )
-        },
-        visualizationSpeed * i + visualizationSpeed * (shortestPathLength as number),
-      )
+      if (!visualizationSpeed) {
+        cellNode?.classList.add(
+          'path--found-path-cell',
+        )
+      }
+      else {
+        setTimeout(
+          () => {
+            cellNode?.classList.add(
+              'path--found-path-cell',
+              'animate-ping-short'
+            )
+          },
+          visualizationSpeed * i + visualizationSpeed * (shortestPathLength as number),
+        )
+      }
     }
   }
 
@@ -327,6 +339,18 @@ function PathFinding() {
       initGrid()
     },
     []
+  )
+
+  useEffect(
+    () => {
+      if (
+        grid.length
+        && isRanAtLeastOne
+      ) {
+        runAlgorithm(0)
+      }
+    },
+    [startPosition.row, startPosition.col, finishPosition.row, finishPosition.col]
   )
 
   // TODO: User can D&D start and finish positions
@@ -365,7 +389,7 @@ function PathFinding() {
           </div>
 
           <Button
-            onClick={runAlgorithm}
+            onClick={() => runAlgorithm(illustrationSpeed)}
             disabled={isVisualizing}
             variant='positive'
           >
