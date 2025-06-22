@@ -5,7 +5,8 @@ export type GridItem = {
   row: number,
   col: number,
   state: CELL_STATE,
-  parent: Position | null,
+  parent: GridItem | null,
+  pathLength: number | null,
 }
 
 export type Position = {
