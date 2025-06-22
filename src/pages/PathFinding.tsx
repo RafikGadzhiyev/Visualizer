@@ -34,6 +34,7 @@ import {
 
 import {
   GridItem,
+  PathFindingAlgorithmResult,
   Position
 } from "@/lib/types"
 
@@ -228,7 +229,7 @@ function PathFinding() {
     setIsVisualizing(true)
     resetGrid()
 
-    let algorithmResult: any;
+    let algorithmResult: PathFindingAlgorithmResult | null = null;
 
     switch(selectedAlgorithm) {
       case "bfs":
@@ -237,54 +238,57 @@ function PathFinding() {
           startPosition,
           finishPosition,
         )
+        break;
     }
 
-    const shortestPathLength = algorithmResult.shortestPath[0].pathLength
+    if (algorithmResult) {
+      const shortestPathLength = algorithmResult.shortestPath[0].pathLength
 
-    for (let i = 0; i < algorithmResult.traversedPath.length; i++) {
-      const traversedCell = algorithmResult.traversedPath[i]
+      for (let i = 0; i < algorithmResult.traversedPath.length; i++) {
+        const traversedCell = algorithmResult.traversedPath[i]
 
-      setTimeout(
-        () => {
-          const cellNode = document.querySelector(`[data-itemKey="${traversedCell.key}"]`)
-
-          cellNode?.classList.add('path--current-visit')
-
-        },
-        illustrationSpeed * traversedCell.pathLength,
-      )
-
-      if (
-        traversedCell.pathLength !== shortestPathLength
-        || (traversedCell.row === finishPosition.row && traversedCell.col === finishPosition.col)
-      ) {
         setTimeout(
           () => {
             const cellNode = document.querySelector(`[data-itemKey="${traversedCell.key}"]`)
 
-            //? Do we actually need to delete prev class
-            cellNode?.classList.remove('path--current-visit')
-            cellNode?.classList.add('path--visited-cell')
+            cellNode?.classList.add('path--current-visit')
+
           },
-          illustrationSpeed * (traversedCell.pathLength + 1),
+          illustrationSpeed * (traversedCell.pathLength as number),
+        )
+
+        if (
+          traversedCell.pathLength !== shortestPathLength
+          || (traversedCell.row === finishPosition.row && traversedCell.col === finishPosition.col)
+        ) {
+          setTimeout(
+            () => {
+              const cellNode = document.querySelector(`[data-itemKey="${traversedCell.key}"]`)
+
+              //? Do we actually need to delete prev class
+              cellNode?.classList.remove('path--current-visit')
+              cellNode?.classList.add('path--visited-cell')
+            },
+            illustrationSpeed * (traversedCell.pathLength as number + 1),
+          )
+        }
+      }
+
+      for (let i = 0; i < algorithmResult.shortestPath.length; i++){
+        const traversedCell = algorithmResult.shortestPath[i]
+
+        setTimeout(
+          () => {
+            const cellNode = document.querySelector(`[data-itemKey="${traversedCell.key}"]`)
+
+            cellNode?.classList.add(
+              'path--found-path-cell',
+              'animate-ping-short'
+            )
+          },
+          illustrationSpeed * i + illustrationSpeed * (shortestPathLength as number),
         )
       }
-    }
-
-    for (let i = 0; i < algorithmResult.shortestPath.length; i++){
-      const traversedCell = algorithmResult.shortestPath[i]
-
-      setTimeout(
-        () => {
-          const cellNode = document.querySelector(`[data-itemKey="${traversedCell.key}"]`)
-
-          cellNode?.classList.add(
-            'path--found-path-cell',
-            'animate-ping-short'
-          )
-        },
-        illustrationSpeed * i + illustrationSpeed * shortestPathLength,
-      )
     }
 
     setIsVisualizing(false)
