@@ -23,8 +23,6 @@ import {
 import { Button } from "@/components/ui/button"
 import { Slider } from "@/components/ui/slider"
 
-import { sleep } from "@/lib/utils"
-
 import {
   GRID_COLS,
   GRID_ROWS,
@@ -36,7 +34,6 @@ import {
 
 import {
   GridItem,
-  PathNode,
   Position
 } from "@/lib/types"
 
@@ -44,6 +41,7 @@ import { CELL_STATE } from '../enums/cellState.enum'
 
 
 import './../styles/path-finding.css'
+import bfs from "@/utils/algorithms/pathFinding/BFS"
 
 
 function PathFinding() {
@@ -54,8 +52,6 @@ function PathFinding() {
 
   const [startPosition, setStartPosition] = useState<Position>({ row: 1, col: 1 })
   const [finishPosition, setFinishPosition] = useState<Position>({ row: 10, col: 10})
-
-  const [visitingCells, setVisitingCells] = useState<string[]>([])
 
   const [isVisualizing, setIsVisualizing] = useState(false)
 
@@ -82,6 +78,7 @@ function PathFinding() {
             col: j,
             state: CELL_STATE.EMPTY,
             parent: null,
+            pathLength: 0,
           }
         )
       }
@@ -129,6 +126,11 @@ function PathFinding() {
     gridRef.current.addEventListener(
       'mouseup',
       onGridMouseUp
+    )
+
+    gridRef.current.addEventListener(
+      'mouseleave',
+      onGridMouseUp,
     )
   }
 
@@ -207,124 +209,82 @@ function PathFinding() {
     )
   }
 
+  function resetGrid() {
+    for (const row of grid) {
+      for (const cell of row) {
+        const cellNode = document.querySelector(`[data-itemKey="${cell.key}"]`)
+
+        cellNode?.classList.remove(
+          "path--visited-cell",
+          "path--found-path-cell",
+          "path--current-visit",
+          "animate-ping-short"
+        )
+      }
+    }
+  }
+
   function runAlgorithm() {
     setIsVisualizing(true)
+    resetGrid()
+
+    let algorithmResult: any;
 
     switch(selectedAlgorithm) {
       case "bfs":
-        return bfs()
+        algorithmResult = bfs(
+          grid,
+          startPosition,
+          finishPosition,
+        )
     }
-  }
 
-  async function bfs() {
-    setGrid(
-      prevGrid => {
-        for (const row of prevGrid) {
-          for (const cell of row) {
-            if (cell.state === CELL_STATE.BLOCKED) {
-              continue
-            }
+    const shortestPathLength = algorithmResult.shortestPath[0].pathLength
 
-            cell.state = CELL_STATE.EMPTY
-          }
-        }
+    for (let i = 0; i < algorithmResult.traversedPath.length; i++) {
+      const traversedCell = algorithmResult.traversedPath[i]
 
-        return [...prevGrid]
+      setTimeout(
+        () => {
+          const cellNode = document.querySelector(`[data-itemKey="${traversedCell.key}"]`)
+
+          cellNode?.classList.add('path--current-visit')
+
+        },
+        illustrationSpeed * traversedCell.pathLength,
+      )
+
+      if (
+        traversedCell.pathLength !== shortestPathLength
+        || (traversedCell.row === finishPosition.row && traversedCell.col === finishPosition.col)
+      ) {
+        setTimeout(
+          () => {
+            const cellNode = document.querySelector(`[data-itemKey="${traversedCell.key}"]`)
+
+            //? Do we actually need to delete prev class
+            cellNode?.classList.remove('path--current-visit')
+            cellNode?.classList.add('path--visited-cell')
+          },
+          illustrationSpeed * (traversedCell.pathLength + 1),
+        )
       }
-    )
+    }
 
-    const startGridItem = grid[startPosition.row][startPosition.col]
+    for (let i = 0; i < algorithmResult.shortestPath.length; i++){
+      const traversedCell = algorithmResult.shortestPath[i]
 
-    const queue: PathNode[]= [
-      {
-        cell: startGridItem,
-        parent: null,
-      }
-    ]
+      setTimeout(
+        () => {
+          const cellNode = document.querySelector(`[data-itemKey="${traversedCell.key}"]`)
 
-    const dirs = [
-      [0, 1],
-      [1, 0],
-      [0, -1],
-      [-1, 0]
-    ]
-
-    while (queue.length) {
-      let length = queue.length
-
-      // console.log(queue, grid)
-      while (length--) {
-        const node = queue.shift()
-
-        if (!node) {
-          continue
-        }
-
-        const cell = node.cell
-
-        if (
-          cell.state === 'blocked'
-          || cell.state === 'visited'
-        ) {
-          continue
-        }
-
-        grid[cell.row][cell.col].state = CELL_STATE.VISITED
-        grid[cell.row][cell.col].parent = node.parent
-
-        if (cell.row === finishPosition.row && cell.col === finishPosition.col) {
-          setVisitingCells([])
-          showShortestPath()
-          return ;
-        }
-
-        for (const [dRow, dCol] of dirs) {
-          const nextRow = cell.row + dRow;
-          const nextCol = cell.col + dCol;
-
-          if (
-            nextRow < 0
-            || nextCol < 0
-            || nextRow >= grid.length
-            || nextCol >= grid[0].length
-          ) {
-            continue
-          }
-
-          queue.push(
-            {
-              cell: grid[nextRow][nextCol],
-              parent: {
-                row: cell.row,
-                col: cell.col
-              },
-            }
+          cellNode?.classList.add(
+            'path--found-path-cell',
+            'animate-ping-short'
           )
-        }
-      }
-
-      setGrid(() => [...grid])
-      setVisitingCells(() => [...queue.map(node => node.cell.key)])
-
-      await sleep(illustrationSpeed)
-    }
-
-    setVisitingCells([])
-  }
-
-  async function showShortestPath() {
-    let currentCell = grid[finishPosition.row][finishPosition.col]
-
-    while (currentCell.parent) {
-      if (currentCell.col === startPosition.col && currentCell.row === startPosition.row) {
-        break;
-      }
-
-      currentCell.state = CELL_STATE.PATH_PART
-
-      currentCell = grid[currentCell.parent.row][currentCell.parent.col]
-      setGrid([...grid])
-      await sleep(illustrationSpeed)
+        },
+        illustrationSpeed * i + illustrationSpeed * shortestPathLength,
+      )
     }
 
     setIsVisualizing(false)
@@ -419,14 +379,13 @@ function PathFinding() {
                             data-itemkey={gridItem.key}
                             className={
                               clsx(
+                                'transition ease-in-out select-none border h-full min-h-2 flex-1',
                                 {
-                                  'transition ease-in-out select-none border h-full min-h-2 flex-1': true,
                                   'path--cell': gridItem.state !== CELL_STATE.BLOCKED && gridItem.state !== CELL_STATE.VISITED,
                                   'path--wall': gridItem.state === CELL_STATE.BLOCKED,
                                   'path--start-position': startPosition.row === gridItem.row && startPosition.col === gridItem.col,
                                   'path--finish-position': finishPosition.row === gridItem.row && finishPosition.col === gridItem.col,
-                                  'path--visited-cell': gridItem.state === CELL_STATE.VISITED,
-                                  'path--current-visit': visitingCells.includes(gridItem.key),
+                                  // 'path--current-visit': visitingCells.includes(gridItem.key),
                                   'path--found-path-cell animate-ping-short': gridItem.state === CELL_STATE.PATH_PART,
                                 }
                               )
