@@ -7,7 +7,7 @@
 }
 
 .path--current-visit {
-  @apply bg-blue-300 animate-pulse
+  @apply bg-blue-300
 }
 
 .path--visited-cell {
