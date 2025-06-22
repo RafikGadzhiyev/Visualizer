@@ -6,13 +6,12 @@
   @apply bg-white border-black
 }
 
-
 .path--current-visit {
   @apply bg-blue-300 animate-pulse
 }
 
 .path--visited-cell {
-  @apply bg-blue-600
+  @apply bg-cyan-700
 }
 
 .path--found-path-cell {
