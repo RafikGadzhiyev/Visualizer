@@ -242,7 +242,8 @@ function PathFinding() {
     }
 
     if (algorithmResult) {
-      const shortestPathLength = algorithmResult.shortestPath[0].pathLength
+      const shortestPathLength = algorithmResult.shortestPath[0]?.pathLength
+        || 0
 
       for (let i = 0; i < algorithmResult.traversedPath.length; i++) {
         const traversedCell = algorithmResult.traversedPath[i]
@@ -289,9 +290,14 @@ function PathFinding() {
           illustrationSpeed * i + illustrationSpeed * (shortestPathLength as number),
         )
       }
-    }
 
-    setIsVisualizing(false)
+      setTimeout(
+        () => {
+          setIsVisualizing(false)
+        },
+        illustrationSpeed * shortestPathLength + illustrationSpeed * algorithmResult.shortestPath.length
+      )
+    }
   }
 
   function getCellPositionFromKey(key: string) {
@@ -383,13 +389,11 @@ function PathFinding() {
                             data-itemkey={gridItem.key}
                             className={
                               clsx(
-                                'transition ease-in-out select-none border h-full min-h-2 flex-1',
+                                'path--cell transition ease-in-out select-none border h-full min-h-2 flex-1',
                                 {
-                                  'path--cell': gridItem.state !== CELL_STATE.BLOCKED && gridItem.state !== CELL_STATE.VISITED,
                                   'path--wall': gridItem.state === CELL_STATE.BLOCKED,
                                   'path--start-position': startPosition.row === gridItem.row && startPosition.col === gridItem.col,
                                   'path--finish-position': finishPosition.row === gridItem.row && finishPosition.col === gridItem.col,
-                                  // 'path--current-visit': visitingCells.includes(gridItem.key),
                                   'path--found-path-cell animate-ping-short': gridItem.state === CELL_STATE.PATH_PART,
                                 }
                               )
