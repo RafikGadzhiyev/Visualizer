@@ -245,56 +245,63 @@ function PathFinding() {
       const shortestPathLength = algorithmResult.shortestPath[0]?.pathLength
         || 0
 
-      for (let i = 0; i < algorithmResult.traversedPath.length; i++) {
-        const traversedCell = algorithmResult.traversedPath[i]
-
-        setTimeout(
-          () => {
-            const cellNode = document.querySelector(`[data-itemKey="${traversedCell.key}"]`)
-
-            cellNode?.classList.add('path--current-visit')
-
-          },
-          illustrationSpeed * (traversedCell.pathLength as number),
-        )
-
-        if (
-          traversedCell.pathLength !== shortestPathLength
-          || (traversedCell.row === finishPosition.row && traversedCell.col === finishPosition.col)
-        ) {
-          setTimeout(
-            () => {
-              const cellNode = document.querySelector(`[data-itemKey="${traversedCell.key}"]`)
-
-              cellNode?.classList.remove('path--current-visit')
-              cellNode?.classList.add('path--visited-cell')
-            },
-            illustrationSpeed * (traversedCell.pathLength as number + 1),
-          )
-        }
-      }
-
-      for (let i = 0; i < algorithmResult.shortestPath.length; i++){
-        const traversedCell = algorithmResult.shortestPath[i]
-
-        setTimeout(
-          () => {
-            const cellNode = document.querySelector(`[data-itemKey="${traversedCell.key}"]`)
-
-            cellNode?.classList.add(
-              'path--found-path-cell',
-              'animate-ping-short'
-            )
-          },
-          illustrationSpeed * i + illustrationSpeed * (shortestPathLength as number),
-        )
-      }
+      visualizePath(algorithmResult, illustrationSpeed)
 
       setTimeout(
         () => {
           setIsVisualizing(false)
         },
         illustrationSpeed * shortestPathLength + illustrationSpeed * algorithmResult.shortestPath.length
+      )
+    }
+  }
+
+  function visualizePath(algorithmResult: PathFindingAlgorithmResult, visualizationSpeed: number) {
+    const shortestPathLength = algorithmResult.shortestPath[0]?.pathLength
+      || 0
+
+    for (let i = 0; i < algorithmResult.traversedPath.length; i++) {
+      const traversedCell = algorithmResult.traversedPath[i]
+
+      setTimeout(
+        () => {
+          const cellNode = document.querySelector(`[data-itemKey="${traversedCell.key}"]`)
+
+          cellNode?.classList.add('path--current-visit')
+
+        },
+        visualizationSpeed * (traversedCell.pathLength as number),
+      )
+
+      if (
+        traversedCell.pathLength !== shortestPathLength
+        || (traversedCell.row === finishPosition.row && traversedCell.col === finishPosition.col)
+      ) {
+        setTimeout(
+          () => {
+            const cellNode = document.querySelector(`[data-itemKey="${traversedCell.key}"]`)
+
+            cellNode?.classList.remove('path--current-visit')
+            cellNode?.classList.add('path--visited-cell')
+          },
+          visualizationSpeed * (traversedCell.pathLength as number + 1),
+        )
+      }
+    }
+
+    for (let i = 0; i < algorithmResult.shortestPath.length; i++){
+      const traversedCell = algorithmResult.shortestPath[i]
+
+      setTimeout(
+        () => {
+          const cellNode = document.querySelector(`[data-itemKey="${traversedCell.key}"]`)
+
+          cellNode?.classList.add(
+            'path--found-path-cell',
+            'animate-ping-short'
+          )
+        },
+        visualizationSpeed * i + visualizationSpeed * (shortestPathLength as number),
       )
     }
   }
