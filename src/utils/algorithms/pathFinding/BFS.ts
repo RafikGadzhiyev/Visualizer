@@ -4,7 +4,7 @@ import {
   Position,
  } from "@/lib/types";
 
-function bfs(grid: Array<GridItem[]>, startPosition: Position, endPosition: Position): PathFindingAlgorithmResult {
+function bfs(grid: Array<GridItem[]>, startPosition: Position, endPosition: Position, wallPositions: Set<string>): PathFindingAlgorithmResult {
   const traversedPath: Array<GridItem> = []
   const shortestPath: Array<GridItem> = [];
 
@@ -41,8 +41,11 @@ function bfs(grid: Array<GridItem[]>, startPosition: Position, endPosition: Posi
           traversedCell => traversedCell.row === cell.row && traversedCell.col === cell.col
         )
 
+      const isCellWall = wallPositions
+        .has(cell.row + '__' + cell.col)
+
       if (
-        cell.state === 'blocked'
+        isCellWall
         || isCellVisitied
       ) {
         continue
