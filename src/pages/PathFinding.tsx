@@ -51,13 +51,16 @@ function PathFinding() {
 
   const [grid, setGrid] = useState<Array<GridItem[]>>([])
 
-  const [startPosition, setStartPosition] = useState<Position>({ row: 1, col: 1 })
-  const [finishPosition, setFinishPosition] = useState<Position>({ row: 10, col: 10})
-
   const [isVisualizing, setIsVisualizing] = useState(false)
   const [isRanAtLeastOne, setIsRanAtLeastOne] = useState(false)
 
   const gridRef = useRef<HTMLDivElement | null>(null)
+
+  const startPosition = useRef<Position>({ row: 1, col: 1})
+  const endPosition = useRef<Position>({row: 3, col: 3})
+
+  const wallPositions = useRef<Set<string>>(new Set())
+
   //? Is it Good?
   const onMouseMoveHandlerRef = useRef<(e: MouseEvent) => void>(null)
 
@@ -111,10 +114,10 @@ function PathFinding() {
 
     let functionType = 'block-cell'
 
-    if (row === startPosition.row && col === startPosition.col) {
+    if (row === startPosition.current.row && col === startPosition.current.col) {
       functionType = 'change-start-position'
     }
-    else if (row === finishPosition.row && col === finishPosition.col) {
+    else if (row === endPosition.current.row && col === endPosition.current.col) {
       functionType = 'change-finish-position'
     }
 
@@ -157,21 +160,20 @@ function PathFinding() {
     if (
       functionType === 'block-cell'
       && (
-        (row !== startPosition.row && col !== startPosition.col)
-        || (row !== finishPosition.row && col !== finishPosition.col)
-        || grid[row][col].state !== CELL_STATE.BLOCKED
+        (row !== startPosition.current.row && col !== startPosition.current.col)
+        || (row !== endPosition.current.row && col !== endPosition.current.col)
       )
     ) {
-      setGrid(
-        prevGrid => {
-          prevGrid[row][col].state = CELL_STATE.BLOCKED;
-
-          return [...prevGrid]
+      addNewWall(
+        {
+          row,
+          col
         }
       )
     }
     else if (functionType === 'change-start-position') {
-      setStartPosition(
+      updateStartPosition(
+        startPosition.current,
         {
           row,
           col
@@ -179,10 +181,11 @@ function PathFinding() {
       )
     }
     else if (functionType === 'change-finish-position') {
-      setFinishPosition(
+      updateEndPosition(
+        endPosition.current,
         {
           row,
-          col,
+          col
         }
       )
     }
@@ -221,6 +224,59 @@ function PathFinding() {
     }
   }
 
+  function addNewWall(wallPosition: Position) {
+    const cellToBeWallKey = getKeyFromCellPosition(wallPosition)
+
+    const cellToBeWall = document.querySelector(`[data-itemKey="${cellToBeWallKey}"]`)
+
+    cellToBeWall?.classList
+      .add(
+        'path--wall'
+      )
+
+    wallPositions.current
+      .add(cellToBeWallKey)
+
+    if (isRanAtLeastOne) {
+      runAlgorithm(0)
+    }
+  }
+
+  // REFACTOR: Merge into ione function
+  function updateStartPosition(oldStartPosition: Position, newStartPosition: Position) {
+    const oldStartPositionCellKey = getKeyFromCellPosition(oldStartPosition)
+    const newStartPositionCellKey = getKeyFromCellPosition(newStartPosition)
+
+    const oldStartPositionCell = document.querySelector(`[data-itemKey="${oldStartPositionCellKey}"]`)
+    const newStartPositionCell = document.querySelector(`[data-itemKey="${newStartPositionCellKey}"]`)
+
+    oldStartPositionCell?.classList.remove('path--start-position')
+    newStartPositionCell?.classList.add('path--start-position')
+
+    startPosition.current = newStartPosition
+
+    if (isRanAtLeastOne) {
+      runAlgorithm(0)
+    }
+  }
+
+    function updateEndPosition(oldEndPosition: Position, newEndPosition: Position) {
+    const oldEndPositionCellKey = getKeyFromCellPosition(oldEndPosition)
+    const newEndPositionCellKey = getKeyFromCellPosition(newEndPosition)
+
+    const oldEndPositionCell = document.querySelector(`[data-itemKey="${oldEndPositionCellKey}"]`)
+    const newStartPositionCell = document.querySelector(`[data-itemKey="${newEndPositionCellKey}"]`)
+
+    oldEndPositionCell?.classList.remove('path--finish-position')
+    newStartPositionCell?.classList.add('path--finish-position')
+
+    endPosition.current = newEndPosition
+
+    if (isRanAtLeastOne) {
+      runAlgorithm(0)
+    }
+  }
+
   function runAlgorithm(runSpeed: number) {
     setIsVisualizing(true)
     setIsRanAtLeastOne(true)
@@ -232,8 +288,9 @@ function PathFinding() {
       case "bfs":
         algorithmResult = bfs(
           grid,
-          startPosition,
-          finishPosition,
+          startPosition.current,
+          endPosition.current,
+          wallPositions.current,
         )
         break;
     }
@@ -276,7 +333,7 @@ function PathFinding() {
 
       if (
         traversedCell.pathLength !== shortestPathLength
-        || (traversedCell.row === finishPosition.row && traversedCell.col === finishPosition.col)
+        || (traversedCell.row === endPosition.current.row && traversedCell.col === endPosition.current.col)
       ) {
         if (!visualizationSpeed) {
           cellNode?.classList.remove('path--current-visit')
@@ -343,14 +400,26 @@ function PathFinding() {
 
   useEffect(
     () => {
-      if (
-        grid.length
-        && isRanAtLeastOne
-      ) {
-        runAlgorithm(0)
+      if (grid.length) {
+        // FIXME I Guess it is bad - need to fix
+        updateStartPosition(
+          startPosition.current,
+          {
+            row: 1,
+            col: 1,
+          }
+        )
+
+        updateEndPosition(
+          endPosition.current,
+          {
+            row: 3,
+            col: 3,
+          }
+        )
       }
     },
-    [startPosition.row, startPosition.col, finishPosition.row, finishPosition.col]
+    [ grid ]
   )
 
   // TODO: User can D&D start and finish positions
@@ -417,17 +486,7 @@ function PathFinding() {
                           <div
                             key={gridItem.key}
                             data-itemkey={gridItem.key}
-                            className={
-                              clsx(
-                                'path--cell transition ease-in-out select-none border h-full min-h-2 flex-1',
-                                {
-                                  'path--wall': gridItem.state === CELL_STATE.BLOCKED,
-                                  'path--start-position': startPosition.row === gridItem.row && startPosition.col === gridItem.col,
-                                  'path--finish-position': finishPosition.row === gridItem.row && finishPosition.col === gridItem.col,
-                                  'path--found-path-cell animate-ping-short': gridItem.state === CELL_STATE.PATH_PART,
-                                }
-                              )
-                            }
+                            className="path--cell transition ease-in-out select-none border h-full min-h-2 flex-1"
                           />
                         )
                       )
