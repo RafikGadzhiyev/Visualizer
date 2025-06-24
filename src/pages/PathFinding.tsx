@@ -277,9 +277,30 @@ function PathFinding() {
     }
   }
 
-  function runAlgorithm(runSpeed: number) {
+  function onClickHandler() {
     setIsVisualizing(true)
     setIsRanAtLeastOne(true)
+
+    const algorithmResult = runAlgorithm(illustrationSpeed)
+
+    let setIsVisualizingTimeout = 0;
+
+    if (algorithmResult) {
+      const shortestPathLength = algorithmResult?.shortestPath[0]?.pathLength
+        || 0
+
+      setIsVisualizingTimeout = illustrationSpeed * shortestPathLength + illustrationSpeed * algorithmResult.shortestPath.length
+    }
+
+    setTimeout(
+      () => {
+        setIsVisualizing(false)
+      },
+      setIsVisualizingTimeout
+    )
+  }
+
+  function runAlgorithm(runSpeed: number): PathFindingAlgorithmResult | null {
     resetGrid()
 
     let algorithmResult: PathFindingAlgorithmResult | null = null;
@@ -296,18 +317,10 @@ function PathFinding() {
     }
 
     if (algorithmResult) {
-      const shortestPathLength = algorithmResult.shortestPath[0]?.pathLength
-        || 0
-
       visualizePath(algorithmResult, runSpeed)
-
-      setTimeout(
-        () => {
-          setIsVisualizing(false)
-        },
-        runSpeed * shortestPathLength + runSpeed * algorithmResult.shortestPath.length
-      )
     }
+
+    return algorithmResult
   }
 
   function visualizePath(algorithmResult: PathFindingAlgorithmResult, visualizationSpeed: number) {
@@ -318,36 +331,40 @@ function PathFinding() {
       const traversedCell = algorithmResult.traversedPath[i]
       const cellNode = document.querySelector(`[data-itemKey="${traversedCell.key}"]`)
 
-      if (!visualizationSpeed) {
-        cellNode?.classList.add('path--current-visit')
-      }
-      else {
-        setTimeout(
-          () => {
-            cellNode?.classList.add('path--current-visit')
+      const isCellVisualized = cellNode?.classList
+        .contains('path--current-visit')
 
-          },
-          visualizationSpeed * (traversedCell.pathLength as number),
-        )
-      }
-
-      if (
-        traversedCell.pathLength !== shortestPathLength
-        || (traversedCell.row === endPosition.current.row && traversedCell.col === endPosition.current.col)
-      ) {
+      if (!isCellVisualized) {
         if (!visualizationSpeed) {
-          cellNode?.classList.remove('path--current-visit')
-          cellNode?.classList.add('path--visited-cell')
+          cellNode?.classList.add('path--current-visit')
         }
         else {
           setTimeout(
             () => {
-              cellNode?.classList.remove('path--current-visit')
-              cellNode?.classList.add('path--visited-cell')
+              cellNode?.classList.add('path--current-visit')
 
             },
-            visualizationSpeed * (traversedCell.pathLength as number + 1),
+            visualizationSpeed * (traversedCell.pathLength as number),
           )
+        }
+
+        if (
+          traversedCell.pathLength !== shortestPathLength
+          || (traversedCell.row === endPosition.current.row && traversedCell.col === endPosition.current.col)
+        ) {
+          if (!visualizationSpeed) {
+            cellNode?.classList.add('path--visited-cell')
+          }
+          else {
+            setTimeout(
+              () => {
+                cellNode?.classList.remove('path--current-visit')
+                cellNode?.classList.add('path--visited-cell')
+
+              },
+              visualizationSpeed * (traversedCell.pathLength as number + 1),
+            )
+          }
         }
       }
     }
@@ -458,7 +475,7 @@ function PathFinding() {
           </div>
 
           <Button
-            onClick={() => runAlgorithm(illustrationSpeed)}
+            onClick={onClickHandler}
             disabled={isVisualizing}
             variant='positive'
           >
