@@ -160,8 +160,8 @@ function PathFinding() {
     if (
       functionType === 'block-cell'
       && (
-        (row !== startPosition.current.row && col !== startPosition.current.col)
-        || (row !== endPosition.current.row && col !== endPosition.current.col)
+        row !== startPosition.current.row || col !== startPosition.current.col
+        || row !== endPosition.current.row || col !== endPosition.current.col
       )
     ) {
       addNewWall(
