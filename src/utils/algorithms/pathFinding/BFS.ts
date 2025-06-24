@@ -26,6 +26,8 @@ function bfs(grid: Array<GridItem[]>, startPosition: Position, endPosition: Posi
   let isPathFound = false
   let pathCell: GridItem | null = null;
 
+  const visitedCells = new Set()
+
   while (queue.length) {
     let length = queue.length;
 
@@ -36,10 +38,8 @@ function bfs(grid: Array<GridItem[]>, startPosition: Position, endPosition: Posi
         continue
       }
 
-      const isCellVisitied = traversedPath
-        .some(
-          traversedCell => traversedCell.row === cell.row && traversedCell.col === cell.col
-        )
+      const isCellVisitied = visitedCells
+        .has(cell.row + '__' + cell.col)
 
       const isCellWall = wallPositions
         .has(cell.row + '__' + cell.col)
@@ -65,11 +65,8 @@ function bfs(grid: Array<GridItem[]>, startPosition: Position, endPosition: Posi
         const nextRow = cell.row + dRow;
         const nextCol = cell.col + dCol;
 
-        // FIXME: Double O(n) checks - not good
-        const isCellVisitied = traversedPath
-          .some(
-            traversedCell => traversedCell.row === nextRow && traversedCell.col === nextCol
-          )
+        const isCellVisitied = visitedCells
+          .has(nextRow + '__' + nextCol)
 
         if (
           nextRow < 0
@@ -85,6 +82,11 @@ function bfs(grid: Array<GridItem[]>, startPosition: Position, endPosition: Posi
 
         queue.push(grid[nextRow][nextCol])
       }
+
+      visitedCells
+        .add(
+          cell.row + '__' + cell.col
+        )
     }
 
     if (isPathFound) {
