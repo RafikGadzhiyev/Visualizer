@@ -2,7 +2,7 @@
 export const BAR_HEIGHT = 400;
 export const BAR_MIN_HEIGHT = 40;
 
-export const MIN_ILLUSTRATION_SPEED = 50 // ms
+export const MIN_ILLUSTRATION_SPEED = 5 // ms
 export const DEFAULT_ILLUSTRATION_SPEED = 150 // ms
 export const MAX_ILLUSTRATION_SPEED = 1000 // ms
 
