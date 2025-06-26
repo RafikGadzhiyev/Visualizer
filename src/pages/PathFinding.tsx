@@ -18,6 +18,12 @@ import {
   CardHeader,
 } from "@/components/ui/card"
 
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from "@/components/ui/popover"
+
 import { Button } from "@/components/ui/button"
 import { Slider } from "@/components/ui/slider"
 import { Label } from '@/components/ui/label'
@@ -39,14 +45,14 @@ import {
 
 import { CELL_STATE } from '../enums/cellState.enum'
 
-
-import './../styles/path-finding.css'
 import bfs from "@/utils/algorithms/pathFinding/BFS"
 
+import simpleZigZagPattern from "@/utils/algorithms/patterns/simpleZigZag"
+
+import './../styles/path-finding.css'
 
 function PathFinding() {
   const [selectedAlgorithm, setSelectedAlgorithm] = useState('bfs')
-  const [selectedPattern, setSelectedPattern] = useState("")
   const [illustrationSpeed, setIllustrationSpeed] = useState(DEFAULT_ILLUSTRATION_SPEED)
 
   const [grid, setGrid] = useState<Array<GridItem[]>>([])
@@ -170,6 +176,10 @@ function PathFinding() {
           col
         }
       )
+
+      if (isRanAtLeastOne) {
+        runAlgorithm(0)
+      }
     }
     else if (functionType === 'change-start-position') {
       updateStartPosition(
@@ -236,10 +246,6 @@ function PathFinding() {
 
     wallPositions.current
       .add(cellToBeWallKey)
-
-    if (isRanAtLeastOne) {
-      runAlgorithm(0)
-    }
   }
 
   // REFACTOR: Merge into ione function
@@ -321,6 +327,45 @@ function PathFinding() {
     }
 
     return algorithmResult
+  }
+
+  function runPattern(patternToRun: string) {
+    resetGrid()
+
+    const cellsConvertToWalls: Position[] = [];
+
+    if (patternToRun === 'simple_zig_zag_pattern') {
+      const simpleStartWalls = simpleZigZagPattern(GRID_ROWS, GRID_COLS)
+
+      cellsConvertToWalls
+        .push(
+          ...simpleStartWalls
+        )
+    }
+
+    // REFACTOR: SPLIT LOGIC AND COMBINE IT WITH VISUALIZEPATH !!!!!
+    for (const row of grid) {
+      for(const cell of row) {
+        const cellNode = document.querySelector(`[data-itemKey="${cell.key}"]`)
+
+        cellNode?.classList
+          .remove('path--wall')
+
+          wallPositions.current
+            .delete(cell.key)
+      }
+    }
+
+    for (let i = 0; i < cellsConvertToWalls.length; ++i) {
+      const cellPosition = cellsConvertToWalls[i]
+
+      setTimeout(
+        () => {
+          addNewWall(cellPosition)
+        },
+        illustrationSpeed * i,
+      )
+    }
   }
 
   function visualizePath(algorithmResult: PathFindingAlgorithmResult, visualizationSpeed: number) {
@@ -471,23 +516,21 @@ function PathFinding() {
               Patterns
             </Label>
 
-            <Select
-              value={selectedAlgorithm}
-              onValueChange={setSelectedAlgorithm}
-              disabled={isVisualizing}
-            >
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Algorithm" />
-              </SelectTrigger>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant='secondary'>Pattern</Button>
+              </PopoverTrigger>
 
-              <SelectContent>
-                <SelectItem value="recursive_division" disabled>Recursive division</SelectItem>
-                <SelectItem value="recursive_division_vs" disabled>Recursive division (vertical skew)</SelectItem>
-                <SelectItem value="recursive_division_hs" disabled>Recursive division (horizontal skew)</SelectItem>
-                <SelectItem value="basic_random_maze" disabled>Basic random maze</SelectItem>
-                <SelectItem value="simple_start_pattern" disabled>Simple star pattern</SelectItem>
-              </SelectContent>
-            </Select>
+              <PopoverContent className="z-100">
+                <div className="flex flex-col gap-2">
+                  <Button className="cursor-pointer" onClick={() => runPattern("recursive_division")} disabled>Recursive division</Button>
+                  <Button className="cursor-pointer" onClick={() => runPattern("recursive_division_vs")} disabled>Recursive division (vertical skew)</Button>
+                  <Button className="cursor-pointer" onClick={() => runPattern("recursive_division_hs")} disabled>Recursive division (horizontal skew)</Button>
+                  <Button className="cursor-pointer" onClick={() => runPattern("basic_random_maze")} disabled>Basic random maze</Button>
+                  <Button className="cursor-pointer" onClick={() => runPattern("simple_zig_zag_pattern")}>Simple zig zag pattern</Button>
+                </div>
+              </PopoverContent>
+            </Popover>
           </div>
 
           <div className='flex flex-col gap-3 w-30'>
