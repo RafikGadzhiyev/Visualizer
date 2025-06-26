@@ -13,6 +13,11 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent
+} from "@/components/ui/tooltip"
 
 import {
   Card,
@@ -22,6 +27,7 @@ import {
 
 import { Button } from "@/components/ui/button"
 import { Slider } from "@/components/ui/slider"
+import { Label } from '@/components/ui/label'
 
 import {
   GRID_COLS,
@@ -444,34 +450,44 @@ function PathFinding() {
     <div className="p-3 min-h-screen h-screen">
       <Card className="h-full">
         <CardHeader className="flex flex-wrap items-center">
-          <Select
-            value={selectedAlgorithm}
-            onValueChange={setSelectedAlgorithm}
-          >
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Algorithm" />
-            </SelectTrigger>
+          <div className="flex flex-col gap-2">
+            <Label>
+              Algorithm
+            </Label>
 
-            <SelectContent>
-              <SelectItem value="bfs">BFS</SelectItem>
-              <SelectItem value="dijkstra" disabled>dijkstra</SelectItem>
-              <SelectItem value="a_star" disabled>A*</SelectItem>
-            </SelectContent>
-          </Select>
+            <Select
+              value={selectedAlgorithm}
+              onValueChange={setSelectedAlgorithm}
+              disabled={isVisualizing}
+            >
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Algorithm" />
+              </SelectTrigger>
 
-          <div className='flex flex-col gap-1'>
-            <label className='text-sm'>
-              Illustration speed
-            </label>
+              <SelectContent>
+                <SelectItem value="bfs">BFS</SelectItem>
+                <SelectItem value="dijkstra" disabled>dijkstra</SelectItem>
+                <SelectItem value="a_star" disabled>A*</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
-            <Slider
-              onValueChange={(e) => onIllustrationSpeedChange(e[0])}
-              defaultValue={[DEFAULT_ILLUSTRATION_SPEED]}
-              min={MIN_ILLUSTRATION_SPEED}
-              max={MAX_ILLUSTRATION_SPEED}
-              step={1}
-              className='flex-1'
-            />
+          <div className='flex flex-col gap-3 w-30'>
+            <Label>
+              Speed: { illustrationSpeed / 1000 }s
+            </Label>
+
+            <div className="py-3">
+              <Slider
+                onValueChange={(e) => onIllustrationSpeedChange(e[0])}
+                defaultValue={[DEFAULT_ILLUSTRATION_SPEED]}
+                min={MIN_ILLUSTRATION_SPEED}
+                max={MAX_ILLUSTRATION_SPEED}
+                step={1}
+                className='flex-1'
+                disabled={isVisualizing}
+              />
+            </div>
           </div>
 
           <Button
