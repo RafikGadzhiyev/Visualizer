@@ -3,7 +3,6 @@ import {
   useRef,
   useState,
 } from "react"
-import clsx from "clsx"
 
 import {
   Select,
@@ -12,12 +11,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-
-import {
-  Tooltip,
-  TooltipTrigger,
-  TooltipContent
-} from "@/components/ui/tooltip"
 
 import {
   Card,
