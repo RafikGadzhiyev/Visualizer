@@ -53,6 +53,7 @@ import bfs from "@/utils/algorithms/pathFinding/BFS"
 
 function PathFinding() {
   const [selectedAlgorithm, setSelectedAlgorithm] = useState('bfs')
+  const [selectedPattern, setSelectedPattern] = useState("")
   const [illustrationSpeed, setIllustrationSpeed] = useState(DEFAULT_ILLUSTRATION_SPEED)
 
   const [grid, setGrid] = useState<Array<GridItem[]>>([])
@@ -468,6 +469,30 @@ function PathFinding() {
                 <SelectItem value="bfs">BFS</SelectItem>
                 <SelectItem value="dijkstra" disabled>dijkstra</SelectItem>
                 <SelectItem value="a_star" disabled>A*</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <Label>
+              Patterns
+            </Label>
+
+            <Select
+              value={selectedAlgorithm}
+              onValueChange={setSelectedAlgorithm}
+              disabled={isVisualizing}
+            >
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Algorithm" />
+              </SelectTrigger>
+
+              <SelectContent>
+                <SelectItem value="recursive_division" disabled>Recursive division</SelectItem>
+                <SelectItem value="recursive_division_vs" disabled>Recursive division (vertical skew)</SelectItem>
+                <SelectItem value="recursive_division_hs" disabled>Recursive division (horizontal skew)</SelectItem>
+                <SelectItem value="basic_random_maze" disabled>Basic random maze</SelectItem>
+                <SelectItem value="simple_start_pattern" disabled>Simple star pattern</SelectItem>
               </SelectContent>
             </Select>
           </div>
