@@ -6,7 +6,7 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function getRandomNumber(from: number, to: number) {
-  return Math.round(Math.random() * (to - from) + from)
+  return Math.floor(Math.random() * (to - from) + from)
 }
 
 export function getMaxNumber(nums: number[]) {

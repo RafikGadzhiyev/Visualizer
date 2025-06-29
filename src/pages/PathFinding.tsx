@@ -50,6 +50,7 @@ import bfs from "@/utils/algorithms/pathFinding/BFS"
 import simpleZigZagPattern from "@/utils/algorithms/patterns/simpleZigZag"
 
 import './../styles/path-finding.css'
+import recursiveDivision from "@/utils/algorithms/patterns/recursiveDivision"
 
 function PathFinding() {
   const [selectedAlgorithm, setSelectedAlgorithm] = useState('bfs')
@@ -342,6 +343,14 @@ function PathFinding() {
           ...simpleStartWalls
         )
     }
+    else if (patternToRun === 'recursive_division') {
+      const recursiveDivisionWalls = recursiveDivision(0, 0, GRID_COLS, GRID_ROWS)
+
+      cellsConvertToWalls
+        .push(
+          ...recursiveDivisionWalls
+        )
+    }
 
     // REFACTOR: SPLIT LOGIC AND COMBINE IT WITH VISUALIZEPATH !!!!!
     for (const row of grid) {
@@ -523,7 +532,7 @@ function PathFinding() {
 
               <PopoverContent className="z-100">
                 <div className="flex flex-col gap-2">
-                  <Button className="cursor-pointer" onClick={() => runPattern("recursive_division")} disabled>Recursive division</Button>
+                  <Button className="cursor-pointer" onClick={() => runPattern("recursive_division")}>Recursive division</Button>
                   <Button className="cursor-pointer" onClick={() => runPattern("recursive_division_vs")} disabled>Recursive division (vertical skew)</Button>
                   <Button className="cursor-pointer" onClick={() => runPattern("recursive_division_hs")} disabled>Recursive division (horizontal skew)</Button>
                   <Button className="cursor-pointer" onClick={() => runPattern("basic_random_maze")} disabled>Basic random maze</Button>

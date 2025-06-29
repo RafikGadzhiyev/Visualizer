@@ -14,3 +14,6 @@ export const GRID_ROWS = 33;
 export const GRID_COLS = 64;
 // export const ARRAY_MIN_VALUE = (-10) ** 9
 // export const ARRAY_MAX_VALUE = 10 ** 9
+
+
+export const RECURSIVE_DIVISION_MIN_RESOLUTION = 3
