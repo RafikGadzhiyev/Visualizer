@@ -34,7 +34,8 @@ import {
 
   DEFAULT_ILLUSTRATION_SPEED,
   MAX_ILLUSTRATION_SPEED,
-  MIN_ILLUSTRATION_SPEED
+  MIN_ILLUSTRATION_SPEED,
+  ILLUSTATION_SPEED_RANGE_STEP
 } from "@/lib/constants"
 
 import {
@@ -553,7 +554,7 @@ function PathFinding() {
                 defaultValue={[DEFAULT_ILLUSTRATION_SPEED]}
                 min={MIN_ILLUSTRATION_SPEED}
                 max={MAX_ILLUSTRATION_SPEED}
-                step={1}
+                step={ILLUSTATION_SPEED_RANGE_STEP}
                 className='flex-1'
                 disabled={isVisualizing}
               />
