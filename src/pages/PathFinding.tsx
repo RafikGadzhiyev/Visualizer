@@ -27,6 +27,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Slider } from "@/components/ui/slider"
 import { Label } from '@/components/ui/label'
+import { Badge } from '@/components/ui/badge'
 
 import {
   GRID_COLS,
@@ -34,7 +35,8 @@ import {
 
   DEFAULT_ILLUSTRATION_SPEED,
   MAX_ILLUSTRATION_SPEED,
-  MIN_ILLUSTRATION_SPEED
+  MIN_ILLUSTRATION_SPEED,
+  ILLUSTATION_SPEED_RANGE_STEP
 } from "@/lib/constants"
 
 import {
@@ -48,9 +50,10 @@ import { CELL_STATE } from '../enums/cellState.enum'
 import bfs from "@/utils/algorithms/pathFinding/BFS"
 
 import simpleZigZagPattern from "@/utils/algorithms/patterns/simpleZigZag"
+import recursiveDivision from "@/utils/algorithms/patterns/recursiveDivision"
+import randomFilling from "@/utils/algorithms/patterns/randomFilling"
 
 import './../styles/path-finding.css'
-import recursiveDivision from "@/utils/algorithms/patterns/recursiveDivision"
 
 function PathFinding() {
   const [selectedAlgorithm, setSelectedAlgorithm] = useState('bfs')
@@ -351,6 +354,14 @@ function PathFinding() {
           ...recursiveDivisionWalls
         )
     }
+    else if (patternToRun === 'random_filling') {
+      const randomFillingWalls = randomFilling(GRID_ROWS, GRID_COLS)
+
+      cellsConvertToWalls
+        .push(
+          ...randomFillingWalls
+        )
+    }
 
     // REFACTOR: SPLIT LOGIC AND COMBINE IT WITH VISUALIZEPATH !!!!!
     for (const row of grid) {
@@ -514,7 +525,7 @@ function PathFinding() {
 
               <SelectContent>
                 <SelectItem value="bfs">BFS</SelectItem>
-                <SelectItem value="dijkstra" disabled>dijkstra</SelectItem>
+                <SelectItem value="dfs" disabled>DFS</SelectItem>
                 <SelectItem value="a_star" disabled>A*</SelectItem>
               </SelectContent>
             </Select>
@@ -532,11 +543,29 @@ function PathFinding() {
 
               <PopoverContent className="z-100">
                 <div className="flex flex-col gap-2">
-                  <Button className="cursor-pointer" onClick={() => runPattern("recursive_division")}>Recursive division</Button>
-                  <Button className="cursor-pointer" onClick={() => runPattern("recursive_division_vs")} disabled>Recursive division (vertical skew)</Button>
-                  <Button className="cursor-pointer" onClick={() => runPattern("recursive_division_hs")} disabled>Recursive division (horizontal skew)</Button>
-                  <Button className="cursor-pointer" onClick={() => runPattern("basic_random_maze")} disabled>Basic random maze</Button>
                   <Button className="cursor-pointer" onClick={() => runPattern("simple_zig_zag_pattern")}>Simple zig zag pattern</Button>
+
+                  <Button className="cursor-pointer" onClick={() => runPattern("recursive_division")}>Recursive division</Button>
+
+                  <Button className="cursor-pointer" onClick={() => runPattern('random_filling')}>Random filling</Button>
+
+                  <Button className="cursor-pointer relative" onClick={() => runPattern("recursive_division_vs")} disabled>
+                    Recursive division (vertical skew)
+
+                    <Badge className="absolute -top-1/12 -right-2">Soon</Badge>
+                  </Button>
+
+                  <Button className="cursor-pointer relative" onClick={() => runPattern("recursive_division_hs")} disabled>
+                    Recursive division (horizontal skew)
+
+                    <Badge className="absolute -top-1/12 -right-2">Soon</Badge>
+                  </Button>
+
+                  <Button className="cursor-pointer relative" onClick={() => runPattern("basic_random_maze")} disabled>
+                    Basic random maze
+
+                    <Badge className="absolute -top-1/12 -right-2">Soon</Badge>
+                  </Button>
                 </div>
               </PopoverContent>
             </Popover>
@@ -553,7 +582,7 @@ function PathFinding() {
                 defaultValue={[DEFAULT_ILLUSTRATION_SPEED]}
                 min={MIN_ILLUSTRATION_SPEED}
                 max={MAX_ILLUSTRATION_SPEED}
-                step={1}
+                step={ILLUSTATION_SPEED_RANGE_STEP}
                 className='flex-1'
                 disabled={isVisualizing}
               />

@@ -45,3 +45,11 @@ export function sleep(ms: number) {
     }
   )
 }
+
+//? I guess there is a better way to shuffle
+export function shuffle<T>(items: T[]) {
+  return items
+    .sort(
+      () => Math.random() < 0.5 ? 1 : -1
+    )
+}
