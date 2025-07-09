@@ -19,6 +19,11 @@ export type Node = {
   parent?: string,
 }
 
+export type AStarNode = GridItem & {
+  h: number,
+  f: number
+}
+
 export type PathNode = {
   cell: GridItem,
   parent: Position | null,

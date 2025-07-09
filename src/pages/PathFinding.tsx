@@ -27,7 +27,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Slider } from "@/components/ui/slider"
 import { Label } from '@/components/ui/label'
-import { Badge } from '@/components/ui/badge'
+// import { Badge } from '@/components/ui/badge'
 
 import {
   GRID_COLS,
@@ -55,6 +55,7 @@ import recursiveDivision from "@/utils/algorithms/patterns/recursiveDivision"
 import randomFilling from "@/utils/algorithms/patterns/randomFilling"
 
 import './../styles/path-finding.css'
+import aStar from "@/utils/algorithms/pathFinding/AStar"
 
 function PathFinding() {
   const [selectedAlgorithm, setSelectedAlgorithm] = useState('bfs')
@@ -338,6 +339,15 @@ function PathFinding() {
           wallPositions.current,
         )
         break;
+
+      case 'a_star':
+        algorithmResult = aStar(
+          grid,
+          startPosition.current,
+          endPosition.current,
+          wallPositions.current
+        )
+        break;
     }
 
     if (algorithmResult) {
@@ -547,7 +557,7 @@ function PathFinding() {
               <SelectContent>
                 <SelectItem value="bfs">BFS</SelectItem>
                 <SelectItem value="dfs">DFS</SelectItem>
-                <SelectItem value="a_star" disabled>A*</SelectItem>
+                <SelectItem value="a_star">A*</SelectItem>
               </SelectContent>
             </Select>
           </div>
