@@ -543,10 +543,9 @@ function PathFinding() {
     [ grid ]
   )
 
-  // TODO: User can D&D start and finish positions
   return(
     <div className="p-3 min-h-screen h-screen">
-      <Card className="h-full">
+      <Card className="h-full min-h-[600px] overflow-y-auto">
         <CardHeader className="flex flex-wrap items-end">
           <div className="flex flex-col gap-2">
             <Label>
@@ -648,7 +647,7 @@ function PathFinding() {
           </Button>
         </CardHeader>
 
-        <CardContent className="h-full overflow-x-auto">
+        <CardContent className="h-full overflow-hidden">
           {/** FIXME: Event does not want to be any */}
           <div
             ref={gridRef}
