@@ -1,3 +1,4 @@
+import { getKeyForPosition } from "@/lib/pathFinding.helpers";
 import {
   GridItem,
   PathFindingAlgorithmResult,
@@ -38,11 +39,13 @@ function bfs(grid: Array<GridItem[]>, startPosition: Position, endPosition: Posi
         continue
       }
 
+      const cellKey = getKeyForPosition(cell)
+
       const isCellVisitied = visitedCells
-        .has(cell.row + '__' + cell.col)
+        .has(cellKey)
 
       const isCellWall = wallPositions
-        .has(cell.row + '__' + cell.col)
+        .has(cellKey)
 
       if (
         isCellWall
@@ -65,8 +68,15 @@ function bfs(grid: Array<GridItem[]>, startPosition: Position, endPosition: Posi
         const nextRow = cell.row + dRow;
         const nextCol = cell.col + dCol;
 
+        const nextCellKey = getKeyForPosition(
+          {
+            row: nextRow,
+            col: nextCol
+          }
+        )
+
         const isCellVisitied = visitedCells
-          .has(nextRow + '__' + nextCol)
+          .has(nextCellKey)
 
         if (
           nextRow < 0
@@ -84,9 +94,7 @@ function bfs(grid: Array<GridItem[]>, startPosition: Position, endPosition: Posi
       }
 
       visitedCells
-        .add(
-          cell.row + '__' + cell.col
-        )
+        .add(cellKey)
     }
 
     if (isPathFound) {

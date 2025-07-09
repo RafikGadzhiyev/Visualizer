@@ -1,3 +1,4 @@
+import { getKeyForPosition } from "@/lib/pathFinding.helpers";
 import { AStarNode, GridItem, Position } from "@/lib/types";
 
 function aStar(grid: Array<GridItem[]>, startPosition: Position, endPosition: Position, wallPositions: Set<string>) {
@@ -36,12 +37,19 @@ function aStar(grid: Array<GridItem[]>, startPosition: Position, endPosition: Po
       const nextRow = lowestNode.row + dRow
       const nextCol = lowestNode.col + dCol
 
+      const cellKey = getKeyForPosition(
+        {
+          row: nextRow,
+          col: nextCol
+        }
+      )
+
       if (
         nextCol < 0
         || nextRow < 0
         || nextRow >= grid.length
         || nextCol >= grid[0].length
-        || wallPositions.has(nextRow + '__' + nextCol)
+        || wallPositions.has(cellKey)
       ) {
         continue
       }

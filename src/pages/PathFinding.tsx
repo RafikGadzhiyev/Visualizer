@@ -40,6 +40,11 @@ import {
 } from "@/lib/constants"
 
 import {
+  getKeyForPosition,
+  getPositionFromKey,
+} from "@/lib/pathFinding.helpers"
+
+import {
   GridItem,
   PathFindingAlgorithmResult,
   Position
@@ -49,13 +54,13 @@ import { CELL_STATE } from '../enums/cellState.enum'
 
 import bfs from "@/utils/algorithms/pathFinding/BFS"
 import dfs from "@/utils/algorithms/pathFinding/DFS"
+import aStar from "@/utils/algorithms/pathFinding/AStar"
 
 import simpleZigZagPattern from "@/utils/algorithms/patterns/simpleZigZag"
 import recursiveDivision from "@/utils/algorithms/patterns/recursiveDivision"
 import randomFilling from "@/utils/algorithms/patterns/randomFilling"
 
 import './../styles/path-finding.css'
-import aStar from "@/utils/algorithms/pathFinding/AStar"
 
 function PathFinding() {
   const [selectedAlgorithm, setSelectedAlgorithm] = useState('bfs')
@@ -90,7 +95,7 @@ function PathFinding() {
 
         row.push(
           {
-            key: getKeyFromCellPosition(cellPosition),
+            key: getKeyForPosition(cellPosition),
             row: i,
             col: j,
             state: CELL_STATE.EMPTY,
@@ -119,10 +124,10 @@ function PathFinding() {
 
     const cellKey = gridCell.getAttribute('data-itemKey') as string
 
-    const [
+    const {
       row,
       col
-    ] = getCellPositionFromKey(cellKey)
+    } = getPositionFromKey(cellKey)
 
     let functionType = 'block-cell'
 
@@ -168,10 +173,10 @@ function PathFinding() {
 
     const cellKey = gridCell.getAttribute('data-itemKey') as string
 
-    const [
+    const {
       row,
       col
-    ] = getCellPositionFromKey(cellKey)
+    } = getPositionFromKey(cellKey)
 
     if (
       functionType === 'block-cell'
@@ -260,7 +265,7 @@ function PathFinding() {
   }
 
   function addNewWall(wallPosition: Position) {
-    const cellToBeWallKey = getKeyFromCellPosition(wallPosition)
+    const cellToBeWallKey = getKeyForPosition(wallPosition)
 
     const cellToBeWall = document.querySelector(`[data-itemKey="${cellToBeWallKey}"]`)
 
@@ -275,8 +280,8 @@ function PathFinding() {
 
   // REFACTOR: Merge into ione function
   function updateStartPosition(oldStartPosition: Position, newStartPosition: Position) {
-    const oldStartPositionCellKey = getKeyFromCellPosition(oldStartPosition)
-    const newStartPositionCellKey = getKeyFromCellPosition(newStartPosition)
+    const oldStartPositionCellKey = getKeyForPosition(oldStartPosition)
+    const newStartPositionCellKey = getKeyForPosition(newStartPosition)
 
     const oldStartPositionCell = document.querySelector(`[data-itemKey="${oldStartPositionCellKey}"]`)
     const newStartPositionCell = document.querySelector(`[data-itemKey="${newStartPositionCellKey}"]`)
@@ -292,8 +297,8 @@ function PathFinding() {
   }
 
     function updateEndPosition(oldEndPosition: Position, newEndPosition: Position) {
-    const oldEndPositionCellKey = getKeyFromCellPosition(oldEndPosition)
-    const newEndPositionCellKey = getKeyFromCellPosition(newEndPosition)
+    const oldEndPositionCellKey = getKeyForPosition(oldEndPosition)
+    const newEndPositionCellKey = getKeyForPosition(newEndPosition)
 
     const oldEndPositionCell = document.querySelector(`[data-itemKey="${oldEndPositionCellKey}"]`)
     const newStartPositionCell = document.querySelector(`[data-itemKey="${newEndPositionCellKey}"]`)
@@ -503,18 +508,6 @@ function PathFinding() {
     }
   }
 
-  function getCellPositionFromKey(key: string) {
-    return key
-    .split('__')
-    .map(
-      stringifiedKeyPart => +stringifiedKeyPart
-    )
-  }
-
-  function getKeyFromCellPosition(cellPosition: Position) {
-    return cellPosition.row + '__' + cellPosition.col
-  }
-
   function onIllustrationSpeedChange(newIllustrationSpeed: number) {
     setIllustrationSpeed(newIllustrationSpeed)
   }
@@ -649,7 +642,7 @@ function PathFinding() {
           <Button
             onClick={() => clearGrid({clearWalls: true})}
             disabled={isVisualizing}
-            variant='ghost'
+            variant='destructive'
           >
             Clear grid
           </Button>

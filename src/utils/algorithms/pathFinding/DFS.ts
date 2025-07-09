@@ -1,3 +1,4 @@
+import { getKeyForPosition } from "@/lib/pathFinding.helpers";
 import { GridItem, Position } from "@/lib/types";
 
 export default function dfs(grid: Array<GridItem[]>, startPosition: Position, endPosition: Position, wallPositions: Set<string>) {
@@ -41,7 +42,7 @@ export default function dfs(grid: Array<GridItem[]>, startPosition: Position, en
       break
     }
 
-    const cellKey = cell.row + '__' + cell.col
+    const cellKey = getKeyForPosition(cell)
 
     if (wallPositions.has(cellKey)) {
       continue
@@ -51,12 +52,19 @@ export default function dfs(grid: Array<GridItem[]>, startPosition: Position, en
       const nextRow = cell.row + dRow
       const nextCol = cell.col + dCol
 
+      const nextCellKey = getKeyForPosition(
+        {
+          row: nextRow,
+          col: nextCol
+        }
+      )
+
       if (
         nextRow < 0
         || nextCol < 0
         || nextRow >= grid.length
         || nextCol >= grid[0].length
-        || visitedCells.has(nextRow + '__' + nextCol)
+        || visitedCells.has(nextCellKey)
       ) {
         continue
       }
@@ -68,9 +76,7 @@ export default function dfs(grid: Array<GridItem[]>, startPosition: Position, en
     }
 
     visitedCells
-      .add(
-        cell.row + '__' + cell.col
-      )
+      .add(cellKey)
   }
 
   while (pathCell) {
