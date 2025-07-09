@@ -229,17 +229,32 @@ function PathFinding() {
     )
   }
 
-  function resetGrid() {
+  function clearGrid(options = {}) {
+    const {
+      clearWalls = false
+    } = options as any
+
+    const classesToDelete = [
+      "path--visited-cell",
+      "path--found-path-cell",
+      "path--current-visit",
+      "animate-ping-short"
+    ]
+
+    if (clearWalls) {
+      classesToDelete
+        .push(
+          'path--wall'
+        )
+
+        wallPositions.current.clear()
+    }
+
     for (const row of grid) {
       for (const cell of row) {
         const cellNode = document.querySelector(`[data-itemKey="${cell.key}"]`)
 
-        cellNode?.classList.remove(
-          "path--visited-cell",
-          "path--found-path-cell",
-          "path--current-visit",
-          "animate-ping-short"
-        )
+        cellNode?.classList.remove(...classesToDelete)
       }
     }
   }
@@ -317,7 +332,7 @@ function PathFinding() {
   }
 
   function runAlgorithm(runSpeed: number): PathFindingAlgorithmResult | null {
-    resetGrid()
+    clearGrid()
 
     let algorithmResult: PathFindingAlgorithmResult | null = null;
 
@@ -358,7 +373,7 @@ function PathFinding() {
   }
 
   function runPattern(patternToRun: string) {
-    resetGrid()
+    clearGrid()
     // new maze = new run
     setIsRanAtLeastOne(false)
 
@@ -539,7 +554,7 @@ function PathFinding() {
   return(
     <div className="p-3 min-h-screen h-screen">
       <Card className="h-full">
-        <CardHeader className="flex flex-wrap items-center">
+        <CardHeader className="flex flex-wrap items-end">
           <div className="flex flex-col gap-2">
             <Label>
               Algorithm
@@ -629,6 +644,14 @@ function PathFinding() {
             variant='positive'
           >
             Run
+          </Button>
+
+          <Button
+            onClick={() => clearGrid({clearWalls: true})}
+            disabled={isVisualizing}
+            variant='ghost'
+          >
+            Clear grid
           </Button>
         </CardHeader>
 
