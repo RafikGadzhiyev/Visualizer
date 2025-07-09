@@ -48,6 +48,7 @@ import {
 import { CELL_STATE } from '../enums/cellState.enum'
 
 import bfs from "@/utils/algorithms/pathFinding/BFS"
+import dfs from "@/utils/algorithms/pathFinding/DFS"
 
 import simpleZigZagPattern from "@/utils/algorithms/patterns/simpleZigZag"
 import recursiveDivision from "@/utils/algorithms/patterns/recursiveDivision"
@@ -324,6 +325,15 @@ function PathFinding() {
           wallPositions.current,
         )
         break;
+
+      case "dfs":
+        algorithmResult = dfs(
+          grid,
+          startPosition.current,
+          endPosition.current,
+          wallPositions.current,
+        )
+        break;
     }
 
     if (algorithmResult) {
@@ -392,6 +402,11 @@ function PathFinding() {
     const shortestPathLength = algorithmResult.shortestPath[0]?.pathLength
       || 0
 
+    const longestPathLength = Math.max(
+      ...algorithmResult.traversedPath
+      .map(gi => gi.pathLength as number)
+    )
+
     for (let i = 0; i < algorithmResult.traversedPath.length; i++) {
       const traversedCell = algorithmResult.traversedPath[i]
       const cellNode = document.querySelector(`[data-itemKey="${traversedCell.key}"]`)
@@ -451,7 +466,7 @@ function PathFinding() {
               'animate-ping-short'
             )
           },
-          visualizationSpeed * i + visualizationSpeed * (shortestPathLength as number),
+          visualizationSpeed * i + visualizationSpeed * (longestPathLength as number + 1),
         )
       }
     }
@@ -525,7 +540,7 @@ function PathFinding() {
 
               <SelectContent>
                 <SelectItem value="bfs">BFS</SelectItem>
-                <SelectItem value="dfs" disabled>DFS</SelectItem>
+                <SelectItem value="dfs">DFS</SelectItem>
                 <SelectItem value="a_star" disabled>A*</SelectItem>
               </SelectContent>
             </Select>
@@ -548,7 +563,7 @@ function PathFinding() {
                   <Button className="cursor-pointer" onClick={() => runPattern("recursive_division")}>Recursive division</Button>
 
                   <Button className="cursor-pointer" onClick={() => runPattern('random_filling')}>Random filling</Button>
-
+{/*
                   <Button className="cursor-pointer relative" onClick={() => runPattern("recursive_division_vs")} disabled>
                     Recursive division (vertical skew)
 
@@ -565,7 +580,7 @@ function PathFinding() {
                     Basic random maze
 
                     <Badge className="absolute -top-1/12 -right-2">Soon</Badge>
-                  </Button>
+                  </Button> */}
                 </div>
               </PopoverContent>
             </Popover>
