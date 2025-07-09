@@ -155,6 +155,10 @@ function PathFinding() {
       return;
     }
 
+    if (isVisualizing) {
+      return
+    }
+
     const gridCell = e.target as HTMLDivElement
 
     if (!gridCell.hasAttribute('data-itemKey')) {
@@ -345,6 +349,8 @@ function PathFinding() {
 
   function runPattern(patternToRun: string) {
     resetGrid()
+    // new maze = new run
+    setIsRanAtLeastOne(false)
 
     const cellsConvertToWalls: Position[] = [];
 
@@ -552,7 +558,10 @@ function PathFinding() {
             </Label>
 
             <Popover>
-              <PopoverTrigger asChild>
+              <PopoverTrigger
+                disabled={isVisualizing}
+                asChild
+              >
                 <Button variant='secondary'>Pattern</Button>
               </PopoverTrigger>
 
