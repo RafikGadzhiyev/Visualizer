@@ -79,7 +79,7 @@ function PathFinding() {
   const wallPositions = useRef<Set<string>>(new Set())
 
   //? Is it Good?
-  const onMouseMoveHandlerRef = useRef<(e: MouseEvent) => void>(null)
+  const onPointerMoveHandlerRef = useRef<(e: MouseEvent) => void>(null)
 
   function initGrid() {
     const preparedGrid: Array<GridItem[]> = [];
@@ -138,20 +138,20 @@ function PathFinding() {
       functionType = 'change-finish-position'
     }
 
-    onMouseMoveHandlerRef.current = (e: MouseEvent) => onGridMouseMove(e, functionType)
+    onPointerMoveHandlerRef.current = (e: MouseEvent) => onGridMouseMove(e, functionType)
 
     gridRef.current.addEventListener(
-      'mousemove',
-      onMouseMoveHandlerRef.current,
+      'pointermove',
+      onPointerMoveHandlerRef.current,
     )
 
     gridRef.current.addEventListener(
-      'mouseup',
+      'pointerup',
       onGridMouseUp
     )
 
     gridRef.current.addEventListener(
-      'mouseleave',
+      'pointerleave',
       onGridMouseUp,
     )
   }
@@ -221,15 +221,15 @@ function PathFinding() {
       return
     }
 
-    if (onMouseMoveHandlerRef.current) {
+    if (onPointerMoveHandlerRef.current) {
       gridRef.current.removeEventListener(
-        'mousemove',
-        onMouseMoveHandlerRef.current,
+        'pointermove',
+        onPointerMoveHandlerRef.current,
       )
     }
 
     gridRef.current.removeEventListener(
-      'mouseup',
+      'pointerup',
       onGridMouseUp
     )
   }
@@ -653,6 +653,7 @@ function PathFinding() {
             ref={gridRef}
             onMouseDown={(e: any) => onGridMouseDown(e)}
             className="h-full flex flex-col justify-start"
+            autoFocus
           >
             {
               !!grid.length && grid.map(
